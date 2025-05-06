@@ -50,7 +50,7 @@ func (g *Game) OutOfBounds() bool {
 func (g *Game) CheckCollisionWithFruit() bool {
 	head := &g.SnakeBody[0]
 	a, b := head.X-g.FruitCoordinate.X, head.Y-g.FruitCoordinate.Y
-	if a*a+b*b <= SNAKE_SIZE*SNAKE_SIZE {
+	if a*a+b*b <= SNAKE_SIZE {
 		return true
 	}
 	return false
@@ -68,9 +68,14 @@ func (g *Game) Update() error {
 	case Right:
 		x_speed, y_speed = 1, 0
 	}
-	head := &g.SnakeBody[0]
-	head.X += SPEED * x_speed * SNAKE_SIZE / 4
-	head.Y += SPEED * y_speed * SNAKE_SIZE / 4
+	head := &g.SnakeBody[len(g.SnakeBody)-1]
+	new_head := Coordinate{}
+	new_head.X = head.X + SPEED*x_speed*SNAKE_SIZE
+	new_head.Y = head.Y + SPEED*y_speed*SNAKE_SIZE
+	for i := 0; i < len(g.SnakeBody)-1; i += 1 {
+		g.SnakeBody[i] = g.SnakeBody[i+1]
+	}
+	g.SnakeBody[len(g.SnakeBody)-1] = new_head
 
 	switch {
 	case ebiten.IsKeyPressed(ebiten.KeyUp):
@@ -89,6 +94,7 @@ func (g *Game) Update() error {
 		g.FruitCount += 1
 		x_pos, y_pos := rand.IntN(WIDTH/FRUIT_SIZE)*FRUIT_SIZE, rand.IntN(HEIGHT/FRUIT_SIZE)*FRUIT_SIZE
 		g.FruitCoordinate = Coordinate{X: x_pos, Y: y_pos}
+		g.SnakeBody = append(g.SnakeBody, Coordinate{X: 20, Y: 20})
 	}
 	return nil
 }
@@ -119,6 +125,7 @@ func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeigh
 func main() {
 	ebiten.SetWindowSize(WIDTH, HEIGHT)
 	ebiten.SetWindowTitle("Snake")
+	ebiten.SetTPS(20)
 	start_x_pos, start_y_pos := rand.IntN(WIDTH/FRUIT_SIZE)*FRUIT_SIZE, rand.IntN(HEIGHT/FRUIT_SIZE)*FRUIT_SIZE
 	game := Game{SnakeBody: []Coordinate{{X: 20, Y: 20}}, FruitCount: 0, FruitCoordinate: Coordinate{start_x_pos, start_y_pos}, Direction: Right}
 	if err := ebiten.RunGame(&game); err != nil {
