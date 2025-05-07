@@ -68,14 +68,12 @@ func (g *Game) Update() error {
 	case Right:
 		x_speed, y_speed = 1, 0
 	}
-	head := &g.SnakeBody[len(g.SnakeBody)-1]
-	new_head := Coordinate{}
-	new_head.X = head.X + SPEED*x_speed*SNAKE_SIZE
-	new_head.Y = head.Y + SPEED*y_speed*SNAKE_SIZE
-	for i := 0; i < len(g.SnakeBody)-1; i += 1 {
-		g.SnakeBody[i] = g.SnakeBody[i+1]
+	head := &g.SnakeBody[0]
+	head.X += SPEED * x_speed * SNAKE_SIZE
+	head.Y += SPEED * y_speed * SNAKE_SIZE
+	for i := len(g.SnakeBody) - 1; i > 0; i -= 1 {
+		g.SnakeBody[i] = g.SnakeBody[i-1]
 	}
-	g.SnakeBody[len(g.SnakeBody)-1] = new_head
 
 	switch {
 	case ebiten.IsKeyPressed(ebiten.KeyUp):
@@ -93,8 +91,8 @@ func (g *Game) Update() error {
 	if g.CheckCollisionWithFruit() {
 		g.FruitCount += 1
 		x_pos, y_pos := rand.IntN(WIDTH/FRUIT_SIZE)*FRUIT_SIZE, rand.IntN(HEIGHT/FRUIT_SIZE)*FRUIT_SIZE
+		g.SnakeBody = append(g.SnakeBody, Coordinate{X: g.FruitCoordinate.X, Y: g.FruitCoordinate.Y})
 		g.FruitCoordinate = Coordinate{X: x_pos, Y: y_pos}
-		g.SnakeBody = append(g.SnakeBody, Coordinate{X: 20, Y: 20})
 	}
 	return nil
 }
