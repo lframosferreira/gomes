@@ -68,7 +68,7 @@ func (g *Game) Update() error {
 		g.BirdSpeed -= GRAVITY
 	}
 	if g.OutOfBounds() {
-		return errors.New("Bird out of bounds")
+		return errors.New("bird out of bounds")
 	}
 	if g.Started {
 		upper_pipe_size := rand.IntN(WINDOW_HEIGHT / 2)
@@ -76,8 +76,15 @@ func (g *Game) Update() error {
 			g.Pipes = append(g.Pipes, Pipe{Coordinate{X: WINDOW_WIDTH, Y: 0}, upper_pipe_size})
 			g.LastAddedPipe = time.Now()
 		}
+		var removeOutOfBounds bool
 		for i := range g.Pipes {
 			g.Pipes[i].X -= PIPE_SPEED
+			if g.Pipes[i].X < -1*PIPE_WIDTH {
+				removeOutOfBounds = true
+			}
+		}
+		if removeOutOfBounds {
+			g.Pipes = g.Pipes[1:]
 		}
 	}
 	return nil
